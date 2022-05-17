@@ -1,0 +1,12 @@
+numpy==1.19.4
+#scikit-image==0.17.2
+#scikit-learn==0.24.0
+#scipy==1.5.4
+tensorflow
+sklearn
+argparse
+pandas==1.1.5
+pathlib 
+seaborn
+keras
+tensorflow_datasets
