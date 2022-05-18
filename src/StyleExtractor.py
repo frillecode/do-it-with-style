@@ -126,20 +126,6 @@ class StyleExtractor:
         return loss, grads
 
 
-
-def deprocess_image(x, img_nrows, img_ncols):
-    ''' Util function to convert a tensor into a valid image
-    '''
-    x = x.reshape((img_nrows, img_ncols, 3))
-    # Remove zero-center by mean pixel
-    x[:, :, 0] += 103.939
-    x[:, :, 1] += 116.779
-    x[:, :, 2] += 123.68
-    # 'BGR'->'RGB'
-    x = x[:, :, ::-1]
-    x = np.clip(x, 0, 255).astype("uint8")
-    return x
-
 def main(style_reference_image_filename, style_reference_image_filepath, base_image_filename="white_noise", base_image_filepath="https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg", iterations=4000):
 
     # Load images
