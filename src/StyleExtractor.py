@@ -131,7 +131,7 @@ class StyleExtractor:
 
 
 
-def main(input_folder_path, base_image_filename="white_noise", base_image_filepath="https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg", iterations=4000):
+def main(input_folder_path, base_image_filename="white_noise", base_image_filepath="https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg", iterations=1000):
 
     for pic in Path(input_folder_path).glob("*.jpg"):
         result_prefix = os.path.splitext(os.path.basename(pic))[0]
@@ -227,11 +227,5 @@ if __name__ == '__main__':
     args = vars(ap.parse_args())
 
     # Running script
-    main(input_folder_path=args['input_path'], iterations=2)
-
-
-
-
-
-
+    main(input_folder_path=args['input_path'])
 
