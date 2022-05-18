@@ -10,3 +10,5 @@ pathlib
 seaborn
 keras
 tensorflow_datasets
+ndjson
+wasabi
