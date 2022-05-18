@@ -6,6 +6,10 @@ import pickle
 from wasabi import msg
 import ndjson
 from tqdm import tqdm
+from pathlib import Path
+import argparse
+import os
+
 
 
 class StyleExtractor:
@@ -126,86 +130,108 @@ class StyleExtractor:
         return loss, grads
 
 
-def main(style_reference_image_filename, style_reference_image_filepath, base_image_filename="white_noise", base_image_filepath="https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg", iterations=4000):
 
-    # Load images
-    base_image_path = keras.utils.get_file(f"{base_image_filename}.jpg", base_image_filepath)
-    style_reference_image_path = keras.utils.get_file(f"{style_reference_image_filename}.jpg", style_reference_image_filepath)
-    result_prefix = style_reference_image_filename
+def main(input_folder_path, base_image_filename="white_noise", base_image_filepath="https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg", iterations=4000):
 
-    msg.info(f'Starting {result_prefix}')
+    for pic in Path(input_folder_path).glob("*.jpg"):
+        result_prefix = os.path.splitext(os.path.basename(pic))[0]
+        
+        # Load images
+        base_image_path = keras.utils.get_file(f"{base_image_filename}.jpg", base_image_filepath)
+        style_reference_image_path = pic 
 
-    # Define input values
-    width, height = keras.preprocessing.image.load_img(base_image_path).size
-    img_nrows = 400
-    img_ncols = int(width * img_nrows / height)
+        msg.info(f'Starting {result_prefix}')
 
-    dictionary = {
-        "total_variation_weight": 1e-6,
-        "style_weight": 1e-6,
-        "content_weight": 2.5e-8,
-        "img_nrows": img_nrows,
-        "img_ncols": img_ncols,
-        #"base_image_path": base_image_path,
-        #"style_reference_image_path": style_reference_image_path, 
-        "style_layer_names": ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"],
-        "content_layer_name": "block5_conv2"
+        # Define input values
+        width, height = keras.preprocessing.image.load_img(base_image_path).size
+        img_nrows = 400
+        img_ncols = int(width * img_nrows / height)
 
-    }
+        dictionary = {
+            "total_variation_weight": 1e-6,
+            "style_weight": 1e-6,
+            "content_weight": 2.5e-8,
+            "img_nrows": img_nrows,
+            "img_ncols": img_ncols,
+            #"base_image_path": base_image_path,
+            #"style_reference_image_path": style_reference_image_path, 
+            "style_layer_names": ["block1_conv1", "block2_conv1", "block3_conv1", "block4_conv1", "block5_conv1"],
+            "content_layer_name": "block5_conv2"
 
-    # Create instance of StyleExtractor class
-    STYLE = StyleExtractor(dictionary)
+        }
 
-    # Training loop
-    optimizer = keras.optimizers.SGD(
-        keras.optimizers.schedules.ExponentialDecay(
-            initial_learning_rate=100.0, decay_steps=100, decay_rate=0.96
+        # Create instance of StyleExtractor class
+        STYLE = StyleExtractor(dictionary)
+
+        # Training loop
+        optimizer = keras.optimizers.SGD(
+            keras.optimizers.schedules.ExponentialDecay(
+                initial_learning_rate=100.0, decay_steps=100, decay_rate=0.96
+                )
             )
-        )
-    base_image = STYLE.preprocess_image(base_image_path)
-    style_reference_image = STYLE.preprocess_image(style_reference_image_path)
-    combination_image = tf.Variable(STYLE.preprocess_image(base_image_path))
+        base_image = STYLE.preprocess_image(base_image_path)
+        style_reference_image = STYLE.preprocess_image(style_reference_image_path)
+        combination_image = tf.Variable(STYLE.preprocess_image(base_image_path))
 
-    losses = []
-    for i in tqdm(range(1, iterations + 1)):
-        loss, grads = STYLE.compute_loss_and_grads(
-            combination_image, base_image, style_reference_image
-        )
-        optimizer.apply_gradients([(grads, combination_image)])
-        if i % 100 == 0:
-            losses.append({
-                'file': result_prefix,
-                'iteration': i,
-                'loss': loss.numpy().tolist()
-            })
+        losses = []
+        for i in tqdm(range(1, iterations + 1)):
+            loss, grads = STYLE.compute_loss_and_grads(
+                combination_image, base_image, style_reference_image
+            )
+            optimizer.apply_gradients([(grads, combination_image)])
+            if i % 100 == 0:
+                losses.append({
+                    'file': result_prefix,
+                    'iteration': i,
+                    'loss': loss.numpy().tolist()
+                })
 
-    # Storing results
-    img = STYLE.deprocess_image(combination_image.numpy())
-    fname = "img/" + result_prefix + "_at_iteration_%d.png" % i
-    keras.preprocessing.image.save_img(fname, img)
+        # Storing results
+        img = STYLE.deprocess_image(combination_image.numpy())
+        fname = "img/" + result_prefix + "_at_iteration_%d.png" % i
 
-    with open(f'res/{result_prefix}', 'wb') as fp:
-        pickle.dump(combination_image.numpy(), fp)
+        if not os.path.exists("img"):
+            os.makedirs("img")
+        
+        keras.preprocessing.image.save_img(fname, img)
+
+        if not os.path.exists("res"):
+            os.makedirs("res")
+
+        with open(f'res/{result_prefix}', 'wb') as fp:
+            pickle.dump(combination_image.numpy(), fp)
+        
+        if not os.path.exists("log"):
+            os.makedirs("log")
+
+        with open(f'log/{result_prefix}', 'w') as fp:
+            ndjson.dump(losses, fp)
+
+
+        msg.good(f'Finished {result_prefix}')
+
+        # Clear session
+        tf.keras.backend.clear_session()
+
+
+if __name__ == '__main__': 
+    ap = argparse.ArgumentParser(description="[INFO]  This script takes image data and extract style representations based on neural style transfer with a white noise image as the content image")
     
-    with open(f'log/{result_prefix}', 'w') as fp:
-        ndjson.dump(losses, fp)
-    
-    msg.good(f'Finished {result_prefix}')
+    # Argument for specifying path to input folder
+    ap.add_argument("-ip", 
+                "--input_path", 
+                required=True, 
+                type=str,
+                help="path to folder with input images (.jpg)") 
 
-    # Clear session
-    tf.keras.backend.clear_session()
+    args = vars(ap.parse_args())
 
-
-if __name__ == '__main__':                                                                                                                         
-    main(style_reference_image_filename ="rudolf", 
-    style_reference_image_filepath="https://www.wga.hu/art/a/aachen/rudolf2.jpg", 
-    iterations=2000)
+    # Running script
+    main(input_folder_path=args['input_path'], iterations=2)
 
 
 
 
-#    with open(f'res/rudolf', 'rb') as fp:
-#        test_res = pickle.load(fp)
-    
-#    with open(f'log/rudolf_new', 'r') as fp:
-#        test_log=ndjson.load(fp)
+
+
+
