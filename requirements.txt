@@ -12,3 +12,5 @@ keras
 tensorflow_datasets
 ndjson
 wasabi
+bokeh
+opencv-python
