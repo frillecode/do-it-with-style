@@ -38,12 +38,35 @@ meta_full = pd.merge(meta, pd.DataFrame({'style_image_filename': filenames, "ori
 x = [embeddings_2d[x]['embedding'][0] for x in range(len(embeddings_2d))]
 y = [embeddings_2d[y]['embedding'][1] for y in range(len(embeddings_2d))]
 
-#meta_full["embedding_x"] = x
-#meta_full["embedding_y"] = y
+meta_full["embedding_x"] = x
+meta_full["embedding_y"] = y
 
 style_images = [f"../img/{filenames[i]}" for i in range(len(embeddings_2d))]
 orig_images = [f"../data/analysis_subset/img/{i}" for i in meta_full['orig_image_filename']]
 artists = list(meta_full['artist'])
+
+
+
+# %%
+# unique_artist = list(set(artists))
+# id = []
+# period = []
+# for artist in unique_artist:
+#     artist_sub = meta_full[meta_full['artist']== artist] 
+#     mid = np.mean(artist_sub['dating_clean']) #max(artist_sub['dating_clean']) - min(artist_sub['dating_clean']) + min(artist_sub['dating_clean'])
+#     for i, dat in enumerate(artist_sub['dating_clean']):
+#         id.append(list(artist_sub['ID'])[i])
+#         if dat >= mid:
+#             period.append(f"{artist}_late")
+#         else:
+#             period.append(f"{artist}_early")
+
+# meta_fuller = pd.merge(meta_full, pd.DataFrame({'ID': id, "artist_split": period}), on="ID", how='outer')
+
+
+
+
+
 
 # %% 
 def np_image_to_base64(im_matrix):
@@ -66,18 +89,18 @@ df = pd.DataFrame({
         'y': y,
         'file': filenames,
         'image': list(map(np_image_to_base64, image_arrays)),
-        "artist": artists 
+        "artist": artists
         })
 
 datasource = ColumnDataSource(df)
 
-color_mapping = CategoricalColorMapper(factors=[art for art in set(artists)], palette=["red", "blue", "green", "orange"])
+color_mapping = CategoricalColorMapper(factors=[art for art in set(list(meta_full['artist']))], palette=["red", "blue", "green", "orange", "pink", "purple", "brown", "black"])
 
 # %%
 plot_figure = figure(
     title='UMAP projection of the Digits dataset',
-    plot_width=600,
-    plot_height=600,
+    plot_width=1000,
+    plot_height=1000,
     tools=('pan, wheel_zoom, reset')
 )
 
