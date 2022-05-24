@@ -3,6 +3,7 @@ import re
 import numpy as np
 import pandas as pd
 import ndjson
+import seaborn as sns
 
 # %%
 # get metadata
