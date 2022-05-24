@@ -65,9 +65,6 @@ artists = list(meta_full['artist'])
 
 
 
-
-
-
 # %% 
 def np_image_to_base64(im_matrix):
     im = Image.fromarray(im_matrix)
@@ -96,9 +93,34 @@ datasource = ColumnDataSource(df)
 
 color_mapping = CategoricalColorMapper(factors=[art for art in set(list(meta_full['artist']))], palette=["red", "blue", "green", "orange", "pink", "purple", "brown", "black"])
 
+
+
+# %%
+
+fig, ax = plt.subplots(figsize=(10, 10))
+
+colors = {'GOGH, Vincent van': 'cornflowerblue',
+        'GOYA Y LUCIENTES, Francisco de': 'lightsalmon',
+        'KUPKA, Frantisek': 'gold',
+        'MONET, Claude': 'darkseagreen'}
+
+
+#ax.scatter(df['x'], df['y'], c=df['artist'].map(colors))
+
+grouped = df.groupby('artist')
+for key, group in grouped:
+    group.plot(ax=ax, kind='scatter', x='x', y='y', label=key, color=colors[key], cmap='viridis')
+
+
+plt.show()
+fig.savefig("../plots/umap_projection_all-artists.png")
+
+
+
+
 # %%
 plot_figure = figure(
-    title='UMAP projection of the Digits dataset',
+    title='UMAP projection of the style embeddings',
     plot_width=1000,
     plot_height=1000,
     tools=('pan, wheel_zoom, reset')
@@ -126,27 +148,6 @@ plot_figure.scatter(
 )
 
 show(plot_figure)
-
-
-# %% 
-''' Produce sprite image
-'''
-# artist = "0520_monet"
-# images = [Image.open(f"../img/{filename}").resize((300,300)) for filename in filenames]
-# image_width, image_height = images[0].size
-# one_square_size = int(np.ceil(np.sqrt(len(images))))
-# master_width = (image_width * one_square_size) 
-# master_height = image_height * one_square_size
-# spriteimage = Image.new(
-#     mode='RGBA',
-#     size=(master_width, master_height),
-#     color=(0,0,0,0))  # fully transparent
-# for count, image in enumerate(images):
-#     div, mod = divmod(count,one_square_size)
-#     h_loc = image_width*div
-#     w_loc = image_width*mod    
-#     spriteimage.paste(image,(w_loc,h_loc))
-# spriteimage.convert("RGB").save(f'../plots/{artist}_sprite.jpg', transparency=0)
 
 
 
@@ -192,3 +193,30 @@ plot_dendrogram(clustering, truncate_mode='level', p=5, labels=clustering.labels
 plt.xlabel("Number of points in cluster (or index of point if no parenthesis).")
 #fig.savefig("20211130_hierachical_clustering_nmf.png")
 # %%
+
+
+
+
+
+
+
+
+# %% 
+''' Produce sprite image
+'''
+# artist = "0520_monet"
+# images = [Image.open(f"../img/{filename}").resize((300,300)) for filename in filenames]
+# image_width, image_height = images[0].size
+# one_square_size = int(np.ceil(np.sqrt(len(images))))
+# master_width = (image_width * one_square_size) 
+# master_height = image_height * one_square_size
+# spriteimage = Image.new(
+#     mode='RGBA',
+#     size=(master_width, master_height),
+#     color=(0,0,0,0))  # fully transparent
+# for count, image in enumerate(images):
+#     div, mod = divmod(count,one_square_size)
+#     h_loc = image_width*div
+#     w_loc = image_width*mod    
+#     spriteimage.paste(image,(w_loc,h_loc))
+# spriteimage.convert("RGB").save(f'../plots/{artist}_sprite.jpg', transparency=0)
