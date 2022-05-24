@@ -205,7 +205,10 @@ plot_prototype_space(
 
 # %%
 # load images
-def laod_proto_imgs(artist_km):
+def load_proto_imgs(artist_km, k=None):
+
+    if k:
+        artist_km = artist_km.query('k == @k')
 
     img_paths = ['../data/analysis_subset/img/' + img_id + '.jpg' for img_id in artist_km['prot_id'].tolist()]
 
@@ -217,90 +220,96 @@ def laod_proto_imgs(artist_km):
 
 # %%
 # asd
-kupka_paintings = laod_proto_imgs(kupka_km)
+
+def composite_clustering_figure_w_prototypes(plotting_data, paintings, outpath):
+
+    fig = plt.figure(figsize=(10, 10), constrained_layout=True) 
+    gs = gridspec.GridSpec(2, 5, figure=fig) 
+
+    # parameters
+    palette = sns.color_palette('Set2')
+    edge_width = 5
+
+    # top part: clustering
+    ax0 = plt.subplot(gs[0, :])
+    plot_prototype_space(plotting_data, k=5, axis=ax0)
+
+    # ax1: cluster 1
+    ax1 = plt.subplot(gs[-1, 0])
+    ax1.imshow(paintings[0])
+    ax1.title.set_text('Cluster 1') 
+    ax1.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
+
+    for position in ['bottom', 'top', 'right', 'left']:
+        ax1.spines[position].set_color(palette[0])
+        ax1.spines[position].set_linewidth(edge_width)
 
 
-fig = plt.figure(figsize=(10, 10), constrained_layout=True) 
-gs = gridspec.GridSpec(2, 5, figure=fig) 
+    # ax2: cluster2
+    ax2 = plt.subplot(gs[-1, -4])
+    ax2.imshow(paintings[1])
+    ax2.title.set_text('Cluster 2') 
+    ax2.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
 
-# parameters
-palette = sns.color_palette('Set2')
-edge_width = 5
+    for position in ['bottom', 'top', 'right', 'left']:
+        ax2.spines[position].set_color(palette[1])
+        ax2.spines[position].set_linewidth(edge_width)
 
-# top part: clustering
-ax0 = plt.subplot(gs[0, :])
-plot_prototype_space(kupka_plt, 5, axis=ax0)
+    # ax3: cluster3
+    ax3 = plt.subplot(gs[-1, -3])
+    ax3.imshow(paintings[2])
+    ax3.title.set_text('Cluster 3') 
+    ax3.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
 
-# ax1: cluster 1
-ax1 = plt.subplot(gs[-1, 0])
-ax1.imshow(kupka_paintings[0])
-ax1.title.set_text('Cluster 1') 
-ax1.tick_params(left=False,
-                bottom=False,
-                labelleft=False,
-                labelbottom=False)
-
-for position in ['bottom', 'top', 'right', 'left']:
-    ax1.spines[position].set_color(palette[0])
-    ax1.spines[position].set_linewidth(edge_width)
-
-
-# ax2: cluster2
-ax2 = plt.subplot(gs[-1, -4])
-ax2.imshow(kupka_paintings[1])
-ax2.title.set_text('Cluster 2') 
-ax2.tick_params(left=False,
-                bottom=False,
-                labelleft=False,
-                labelbottom=False)
-
-for position in ['bottom', 'top', 'right', 'left']:
-    ax2.spines[position].set_color(palette[1])
-    ax2.spines[position].set_linewidth(edge_width)
-
-# ax3: cluster3
-ax3 = plt.subplot(gs[-1, -3])
-ax3.imshow(kupka_paintings[2])
-ax3.title.set_text('Cluster 3') 
-ax3.tick_params(left=False,
-                bottom=False,
-                labelleft=False,
-                labelbottom=False)
-
-for position in ['bottom', 'top', 'right', 'left']:
-    ax3.spines[position].set_color(palette[2])
-    ax3.spines[position].set_linewidth(edge_width)
+    for position in ['bottom', 'top', 'right', 'left']:
+        ax3.spines[position].set_color(palette[2])
+        ax3.spines[position].set_linewidth(edge_width)
 
 
-# ax4: cluster4
-ax4 = plt.subplot(gs[-1, -2])
-ax4.imshow(kupka_paintings[3])
-ax4.title.set_text('Cluster 4') 
-ax4.tick_params(left=False,
-                bottom=False,
-                labelleft=False,
-                labelbottom=False)
+    # ax4: cluster4
+    ax4 = plt.subplot(gs[-1, -2])
+    ax4.imshow(paintings[3])
+    ax4.title.set_text('Cluster 4') 
+    ax4.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
 
-for position in ['bottom', 'top', 'right', 'left']:
-    ax4.spines[position].set_color(palette[3])
-    ax4.spines[position].set_linewidth(edge_width)
+    for position in ['bottom', 'top', 'right', 'left']:
+        ax4.spines[position].set_color(palette[3])
+        ax4.spines[position].set_linewidth(edge_width)
 
 
-# ax5: cluster5
-ax5 = plt.subplot(gs[-1, -1])
-ax5.imshow(kupka_paintings[4])
-ax5.title.set_text('Cluster 5') 
-ax5.tick_params(left=False,
-                bottom=False,
-                labelleft=False,
-                labelbottom=False)
+    # ax5: cluster5
+    ax5 = plt.subplot(gs[-1, -1])
+    ax5.imshow(paintings[4])
+    ax5.title.set_text('Cluster 5') 
+    ax5.tick_params(left=False,
+                    bottom=False,
+                    labelleft=False,
+                    labelbottom=False)
 
-for position in ['bottom', 'top', 'right', 'left']:
-    ax5.spines[position].set_color(palette[4])
-    ax5.spines[position].set_linewidth(edge_width)
+    for position in ['bottom', 'top', 'right', 'left']:
+        ax5.spines[position].set_color(palette[4])
+        ax5.spines[position].set_linewidth(edge_width)
 
-plt.tight_layout()
-plt.savefig('../plots/kupka_k5.png')
+    plt.tight_layout()
+    plt.savefig(outpath)
+
+# %%
+# run 
+kupka_paintings = load_proto_imgs(kupka_km, k=5)
+composite_clustering_figure_w_prototypes(kupka_plt, kupka_paintings, '../plots/kupka_k5.png')
+
 
 # %%
 # show prototypes for each k
