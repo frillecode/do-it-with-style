@@ -37,7 +37,7 @@ def preprocessing(img_nrows, img_ncols):
     data = np.array(data)
 
     # Normalise data
-    data = data.astype("float")/255.0
+    data = data.astype("float")/255.0 
 
     # Split data
     (trainX, testX, trainY, testY) = train_test_split(data, 
@@ -134,7 +134,6 @@ def objective(trial):
     print(cm)
 
     return cm['accuracy']
-
 
 
 def main():
