@@ -1,4 +1,15 @@
 # %%
+import os
+import pandas as pd
+import numpy as np
+import cv2
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelBinarizer
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+
+
+from tensorflow import keras
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten, Dropout, Activation, MaxPool2D
@@ -6,10 +17,14 @@ tf.config.run_functions_eagerly(True)
 
 # %%
 # load a sample to get input dimensions
-sample_img_path = '../img/1900_the-beginning-of-life_at_iteration_1000.png'
-width, height = tf.keras.preprocessing.image.load_img(sample_img_path).size
-img_nrows = 400
-img_ncols = int(width * img_nrows / height)
+# sample_img_path = keras.utils.get_file("white_noise.jpg", "https://live.staticflickr.com/8465/8376267144_b0c41f8d65_b.jpg")
+# width, height = tf.keras.preprocessing.image.load_img(sample_img_path).size
+# img_nrows = 400
+# img_ncols = int(width * img_nrows / height)
+# channels = 3
+
+img_nrows = 224
+img_ncols = 224
 channels = 3
 
 # %%
@@ -26,11 +41,31 @@ for layer in vgg19.layers:
 
 # add fully connected layers
 # NN1
+model.add(Flatten())
+model.add(Dense(4096))
+model.add(Dense(2048))
+model.add(Dense(3))
+model.add(Activation('softmax'))
+
+
+# NN2
 # model.add(Flatten())
-# model.add(Dense(4096))
-# model.add(Dense(2048))
+# model.add(Dense(512))
+# model.add(Activation('relu'))
+# model.add(Dropout(0.1))
 # model.add(Dense(4))
 # model.add(Activation('softmax'))
+
+
+# NN3
+# model.add(Flatten())
+# model.add(Dense(4096))
+# model.add(Dropout(0.2))
+# model.add(Dense(2048))
+# model.add(Dropout(0.2))
+# model.add(Dense(3))
+# model.add(Activation('softmax'))
+
 
 # check if layers are trainable
 num_layers = len(model.layers)
@@ -46,19 +81,17 @@ model.summary()
 
 
 
+
+
 # %%
-import os
-import pandas as pd
-import numpy as np
-import cv2
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelBinarizer
-from sklearn.metrics import classification_report
-import matplotlib.pyplot as plt
+output_name = "nn1_epoch5_batchsize32_s224_nokupka"
 
 # %%
 
 meta = pd.read_csv(os.path.join("..", "data", "analysis_subset", "subset_metadata.csv"))
+
+meta = meta[meta['artist'] != "KUPKA, Frantisek"]
+
 
 # Labels
 labelNames = list(set(meta['artist']))
@@ -68,7 +101,8 @@ data = []
 label = []
 for i, id in enumerate(meta['ID']):
     # Preprocess and save image data
-    pic_array = cv2.imread(os.path.join("..", "img", f"{id}_at_iteration_1000.png")) #load image
+    pic_array = cv2.imread(os.path.join("..", "img", f"{id}_at_iteration_1000.png")) #load style image
+    #pic_array = cv2.imread(os.path.join("..", "data", "analysis_subset", "img", f"{id}.jpg")) #load original image
     compressed = cv2.resize(pic_array, (img_ncols, img_nrows), interpolation = cv2.INTER_AREA) #resize image to fit VGG-16
     data.append(compressed) 
     # Saving label
@@ -94,9 +128,6 @@ testY = lb.fit_transform(testY)
 
 
 
-
-
-
 # %%
 epochs = 5
 batch_size = 32
@@ -110,23 +141,31 @@ H = model.fit(trainX, trainY,
         )
 
 
+# %% 
+#load models
+model_orig_img = keras.models.load_model('/work/72169/paintings-style-bab-bab-bab/models/nn1_epoch5_batchsize32_s224_nokupka_orig')
+model_style_img = keras.models.load_model('/work/72169/paintings-style-bab-bab-bab/models/nn1_epoch5_batchsize32_s224_nokupka')
+
+
 # %%
 # Evaluate model
 predictions = model.predict(testX, batch_size=batch_size)
+big_predictions = model.predict(x)
 
 cm = classification_report(testY.argmax(axis=1),
                             predictions.argmax(axis=1),
                             target_names=labelNames)
 
 
-with open("evaluation_metric.txt", "w", encoding="utf-8") as file:
-    file.write(cm)
+# with open(f"{output_name}_evaluation_metric.txt", "w", encoding="utf-8") as file:
+#     file.write(cm)
 
 
 # %%
 # Visualize performance
+fig, ax = plt.subplots()
 plt.style.use("fivethirtyeight")
-plt.figure()
+#plt.figure()
 plt.plot(np.arange(0, epochs), H.history["loss"], label="train_loss")
 plt.plot(np.arange(0, epochs), H.history["val_loss"], label="val_loss")
 plt.plot(np.arange(0, epochs), H.history["accuracy"], label="train_acc")
@@ -140,11 +179,9 @@ plt.show()
 
 # Save plot
 # plot_path = os.path.join("out", "performance.png")
-plt.savefig("nn1_epoch5_performance.png", dpi=300, bbox_inches="tight")
+#fig.savefig(f"{output_name}_performance.png", dpi=300, bbox_inches="tight")
 
 # %%
 # save model
-model.save(
-"nn1_epoch5_batchsize32"
-)
+#model.save(f"{output_name}")
 # %%
