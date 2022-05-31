@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VENVNAME=dsexamvenv
+VENVNAME=paint-venv
 
 python3 -m venv $VENVNAME
 source $VENVNAME/bin/activate

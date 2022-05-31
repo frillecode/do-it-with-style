@@ -1,3 +1,8 @@
+'''
+This script performs Neural Style Transfer on a corpus of images of artworks. 
+The initial code procedure is inspired by https://github.com/keras-team/keras-io/blob/master/examples/generative/neural_style_transfer.py 
+from Keras and has been adapted for this specific project. 
+'''
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
@@ -90,7 +95,7 @@ class StyleExtractor:
 
 
     def compute_loss(self, combination_image, base_image, style_reference_image):
-        ''' COmpute style transfer loss
+        ''' Compute style transfer loss
         '''
         input_tensor = tf.concat(
             [base_image, style_reference_image, combination_image], axis=0

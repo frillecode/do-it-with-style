@@ -1,7 +1,6 @@
 numpy==1.19.4
-#scikit-image==0.17.2
-#scikit-learn==0.24.0
-#scipy==1.5.4
+scipy==1.5.4
+scikit-learn
 tensorflow
 sklearn
 argparse
@@ -14,3 +13,6 @@ ndjson
 wasabi
 bokeh
 opencv-python
+
+
+
