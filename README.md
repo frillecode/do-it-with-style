@@ -6,8 +6,6 @@
   <p align="center">
     Jan Kostkan & Frida Hæstrup 
 
-    <br>
-</p>
 
 This repository contains the code related to our exam paper in Data Science at Aarhus University. The project uses Neural Style Transfer to create and analyse object-agnostic representations of digitized images of paintings. 
 
