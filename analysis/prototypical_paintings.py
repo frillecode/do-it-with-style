@@ -1,3 +1,6 @@
+'''
+This script is for plotting the clusters and identifying central embeddings
+'''
 # %%
 import re
 import ndjson

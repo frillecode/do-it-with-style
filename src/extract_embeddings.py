@@ -1,3 +1,7 @@
+'''
+Extracting image embeddings
+'''
+
 # %%
 import os
 from tqdm import tqdm

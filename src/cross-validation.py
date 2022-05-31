@@ -1,3 +1,6 @@
+'''
+Script for classifying artists based on different versions of paintings (original or style images) using a CNN model
+'''
 import os
 import argparse 
 import pandas as pd
@@ -20,37 +23,52 @@ tf.config.run_functions_eagerly(True)
 
 
 def create_model():
-    # base model
+    ''' Build and compile CNN model with pretrained weights
+    Returns
+    ----------
+    model: instance of class Sequential
+        Compiled model
+
+    '''
+    # Base model
     vgg19 = tf.keras.applications.VGG19(
         weights="imagenet", include_top=False, input_shape=(224, 224, 3)
     )
 
-    # transfer vgg layes into fine-tuning model
+    # Transfer vgg layes into fine-tuning model
     model = Sequential()
     for layer in vgg19.layers:
         layer.trainable = False
         model.add(layer)
 
-    # add fully connected layers
-    # NN1
+    # Add fully connected layers
     model.add(Flatten())
     model.add(Dense(4096))
     model.add(Dense(2048))
     model.add(Dense(3))
     model.add(Activation('softmax'))
 
-    # check if layers are trainable
+    # Check if layers are trainable
     num_layers = len(model.layers)
     for x in range(0, num_layers):
         print(model.layers[x].trainable)
 
-    # compile model
+    # Compile model
     model.compile(optimizer='Adam', metrics=['accuracy'], loss='categorical_crossentropy')
 
     return model
 
 
 def main(output_name, image_type):
+    '''
+    Apply CNN model to the input data
+    Parameters
+    ----------
+    output_name: str
+        Filename for results to be saved under
+    image_type: str
+        Type of input image (specific for this project). Can be either "style" or "original"
+    '''
     print("[INFO] Preparing data")
 
     meta = pd.read_csv(os.path.join("..", "data", "analysis_subset", "subset_metadata.csv"))

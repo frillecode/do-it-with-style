@@ -1,7 +1,7 @@
 '''
 This script performs Neural Style Transfer on a corpus of images of artworks. 
 The initial code procedure is inspired by https://github.com/keras-team/keras-io/blob/master/examples/generative/neural_style_transfer.py 
-from Keras and has been adapted for this specific project. 
+from Keras and has been adapted and turned into a class for this specific project. 
 '''
 import numpy as np
 import tensorflow as tf
